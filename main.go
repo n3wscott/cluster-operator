@@ -19,13 +19,15 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	rabbitmqv1beta1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
-	"github.com/rabbitmq/cluster-operator/controllers"
 	"k8s.io/apimachinery/pkg/runtime"
 	defaultscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	rabbitmqv1beta1 "github.com/rabbitmq/cluster-operator/api/v1beta1"
+	rabbitmqcomv1beta2 "github.com/rabbitmq/cluster-operator/api/v1beta2"
+	"github.com/rabbitmq/cluster-operator/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -39,6 +41,7 @@ var (
 func init() {
 	_ = rabbitmqv1beta1.AddToScheme(scheme)
 	_ = defaultscheme.AddToScheme(scheme)
+	_ = rabbitmqcomv1beta2.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 

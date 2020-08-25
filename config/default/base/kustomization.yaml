@@ -14,7 +14,7 @@ resources:
 # [WEBHOOK] Uncomment all the sections with [WEBHOOK] prefix to enable webhook.
 #- ../webhook
 # [CERTMANAGER] Uncomment next line to enable cert-manager
-#- ../certmanager
+- ../../certmanager
 
 patches:
 - manager_image_patch.yaml
