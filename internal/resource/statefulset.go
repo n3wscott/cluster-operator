@@ -21,6 +21,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
+	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -91,6 +92,7 @@ func (builder *StatefulSetBuilder) Build() (runtime.Object, error) {
 				if err := controllerutil.SetControllerReference(builder.Instance, &pvcList[i], builder.Scheme); err != nil {
 					return nil, fmt.Errorf("failed setting controller reference: %v", err)
 				}
+				disableBlockOwnerDeletion(pvcList[i])
 			}
 			sts.Spec.VolumeClaimTemplates = pvcList
 		}
@@ -121,8 +123,17 @@ func persistentVolumeClaim(instance *rabbitmqv1beta1.RabbitmqCluster, scheme *ru
 	if err := controllerutil.SetControllerReference(instance, &pvc, scheme); err != nil {
 		return []corev1.PersistentVolumeClaim{}, fmt.Errorf("failed setting controller reference: %v", err)
 	}
+	disableBlockOwnerDeletion(pvc)
 
 	return []corev1.PersistentVolumeClaim{pvc}, nil
+}
+
+// required for OpenShift compatibility, see https://github.com/rabbitmq/cluster-operator/issues/234
+func disableBlockOwnerDeletion(pvc corev1.PersistentVolumeClaim) {
+	refs := pvc.OwnerReferences
+	for i := range refs {
+		refs[i].BlockOwnerDeletion = pointer.BoolPtr(false)
+	}
 }
 
 func (builder *StatefulSetBuilder) Update(object runtime.Object) error {
